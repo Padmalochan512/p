@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ApexInvoice AI • Intelligent Document Processing Agent</title>
+  <meta name="description" content="State-of-the-art AI Document & Invoice Processing Agent with OCR, vision extraction, automated cross-checks, math validation, and inbox watching.">
+  
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="navbar">
+    <div class="brand">
+      <div class="brand-icon">
+        <i data-lucide="file-check-2"></i>
+      </div>
+      <div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <h1 class="brand-title">ApexInvoice AI</h1>
+          <span class="brand-badge">PRO v2.0</span>
+        </div>
+        <p style="font-size: 0.72rem; color: var(--text-dim);">Document Extraction & Validation Agent</p>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-links">
+      <button class="nav-btn active" data-target="view-dashboard" id="tab-dashboard">
+        <i data-lucide="layout-dashboard" style="width: 16px; height: 16px;"></i> Dashboard
+      </button>
+      <button class="nav-btn" data-target="view-ledger" id="tab-ledger">
+        <i data-lucide="file-text" style="width: 16px; height: 16px;"></i> Documents <span id="nav-count-badge" style="background: rgba(56,189,248,0.2); padding: 1px 6px; border-radius: 10px; font-size: 0.75rem; margin-left: 4px;">0</span>
+      </button>
+      <button class="nav-btn" data-target="view-reviewer" id="tab-reviewer">
+        <i data-lucide="split" style="width: 16px; height: 16px;"></i> Review & Verify
+      </button>
+      <button class="nav-btn" data-target="view-automation" id="tab-automation">
+        <i data-lucide="bot" style="width: 16px; height: 16px;"></i> Folder Watcher
+      </button>
+    </nav>
+
+    <!-- Header Quick Actions -->
+    <div class="header-actions">
+      <button class="btn btn-secondary btn-sm" id="btn-quick-samples">
+        <i data-lucide="sparkles" style="width: 15px; height: 15px; color: var(--accent-cyan);"></i> Generate Test Invoices
+      </button>
+      <button class="btn btn-icon" id="btn-open-settings" title="Engine Settings & Rules">
+        <i data-lucide="settings" style="width: 18px; height: 18px;"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container">
+
+    <!-- ========================================== -->
+    <!-- VIEW 1: EXECUTIVE DASHBOARD               -->
+    <!-- ========================================== -->
+    <section class="view-section active" id="view-dashboard">
+      
+      <!-- Drag & Drop Upload Hero -->
+      <div class="dropzone-container" id="dropzone">
+        <input type="file" id="file-input" multiple accept=".pdf,.png,.jpg,.jpeg,.webp" style="display: none;">
+        <div class="dropzone-icon">
+          <i data-lucide="upload-cloud" style="width: 28px; height: 28px;"></i>
+        </div>
+        <h3 class="dropzone-title">Upload Invoices & Business Documents</h3>
+        <p class="dropzone-desc">Drag & drop PDF, Scanned Images (PNG, JPG) or click to browse. Instant OCR, Table Extraction & Mathematical Cross-checks.</p>
+        <div class="preset-actions">
+          <button class="btn btn-primary btn-sm" onclick="document.getElementById('file-input').click()">
+            <i data-lucide="file-plus" style="width: 15px; height: 15px;"></i> Browse Files
+          </button>
+          <button class="btn btn-secondary btn-sm" id="btn-load-presets-dash">
+            <i data-lucide="zap" style="width: 15px; height: 15px; color: var(--accent-amber);"></i> Load 4 Realistic Preset Scenarios
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI Summary Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-info">
+            <h4>Total Processed</h4>
+            <div class="kpi-val" id="kpi-total-docs">0</div>
+            <div class="kpi-sub" id="kpi-confidence-sub">Avg Confidence: --%</div>
+          </div>
+          <div class="kpi-icon blue"><i data-lucide="layers" style="width: 24px; height: 24px;"></i></div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-info">
+            <h4>Total Spend Invoiced</h4>
+            <div class="kpi-val" id="kpi-total-spend" style="color: var(--accent-cyan);">$0.00</div>
+            <div class="kpi-sub" id="kpi-currency-sub">USD Cumulative</div>
+          </div>
+          <div class="kpi-icon emerald"><i data-lucide="badge-dollar-sign" style="width: 24px; height: 24px;"></i></div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-info">
+            <h4>Approved / Passed</h4>
+            <div class="kpi-val" id="kpi-approved-count" style="color: var(--accent-emerald);">0</div>
+            <div class="kpi-sub">100% Math Match</div>
+          </div>
+          <div class="kpi-icon emerald"><i data-lucide="check-circle" style="width: 24px; height: 24px;"></i></div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-info">
+            <h4>Flagged / Mismatches</h4>
+            <div class="kpi-val" id="kpi-flagged-count" style="color: var(--accent-rose);">0</div>
+            <div class="kpi-sub" id="kpi-high-val-sub">0 High-Value Invoices</div>
+          </div>
+          <div class="kpi-icon rose"><i data-lucide="alert-triangle" style="width: 24px; height: 24px;"></i></div>
+        </div>
+      </div>
+
+      <!-- Analytics & Alert Center Grid -->
+      <div class="dashboard-grid">
+        
+        <!-- Left: Top Vendor Spend Analytics -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title"><i data-lucide="bar-chart-3" style="width: 20px; height: 20px; color: var(--accent-cyan);"></i> Spend by Top Vendors</h3>
+            <button class="btn btn-secondary btn-sm" onclick="fetchStats()">Refresh</button>
+          </div>
+          <div id="vendor-spend-container">
+            <p style="color: var(--text-dim); text-align: center; padding: 40px 0;">No documents ingested yet.</p>
+          </div>
+        </div>
+
+        <!-- Right: Recent Live Alerts Feed -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title"><i data-lucide="bell-ring" style="width: 20px; height: 20px; color: var(--accent-amber);"></i> Live Alert Feed</h3>
+            <span class="status-badge badge-pending" id="badge-alert-count">0 Alerts</span>
+          </div>
+          <div class="alert-feed-list" id="alert-feed-list">
+            <p style="color: var(--text-dim); text-align: center; padding: 40px 0;">No active alerts.</p>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW 2: DOCUMENT LEDGER & EXPLORER         -->
+    <!-- ========================================== -->
+    <section class="view-section" id="view-ledger">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title"><i data-lucide="table-properties" style="width: 20px; height: 20px; color: var(--accent-cyan);"></i> Invoices & Documents Ledger</h2>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Search, audit, inspect validation flags, and export structured datasets.</p>
+          </div>
+          
+          <!-- Export Buttons -->
+          <div style="display: flex; gap: 8px;">
+            <a href="/api/export/csv" class="btn btn-secondary btn-sm" download>
+              <i data-lucide="download" style="width: 14px; height: 14px;"></i> Export Invoices CSV
+            </a>
+            <a href="/api/export/line-items-csv" class="btn btn-secondary btn-sm" download>
+              <i data-lucide="list-collapse" style="width: 14px; height: 14px;"></i> Line Items CSV
+            </a>
+            <a href="/api/export/json" class="btn btn-secondary btn-sm" download>
+              <i data-lucide="code" style="width: 14px; height: 14px;"></i> JSON Dump
+            </a>
+          </div>
+        </div>
+
+        <!-- Filters Bar -->
+        <div class="filter-bar">
+          <div class="search-input-wrap">
+            <i data-lucide="search"></i>
+            <input type="text" id="ledger-search" class="search-input" placeholder="Search vendor name, invoice #, file name...">
+          </div>
+          <select id="ledger-status-filter" class="select-filter">
+            <option value="ALL">All Statuses</option>
+            <option value="APPROVED">Approved (Valid)</option>
+            <option value="FLAGGED">Flagged (Errors)</option>
+            <option value="PENDING_REVIEW">Pending Review</option>
+            <option value="REJECTED">Rejected</option>
+          </select>
+        </div>
+
+        <!-- Invoices Table -->
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Vendor / Payee</th>
+                <th>Invoice #</th>
+                <th>Date</th>
+                <th>Total Amount</th>
+                <th>Lines</th>
+                <th>Confidence</th>
+                <th>Validation Flags</th>
+                <th style="text-align: right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="invoices-table-body">
+              <tr>
+                <td colspan="9" style="text-align: center; color: var(--text-dim); padding: 40px;">Loading document database...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW 3: INTERACTIVE SPLIT-SCREEN REVIEWER  -->
+    <!-- ========================================== -->
+    <section class="view-section" id="view-reviewer">
+      
+      <!-- Empty State when no document is selected -->
+      <div id="reviewer-empty-state" class="card" style="text-align: center; padding: 60px 20px;">
+        <i data-lucide="file-search" style="width: 64px; height: 64px; color: var(--accent-cyan); margin-bottom: 16px;"></i>
+        <h3 style="font-size: 1.3rem; margin-bottom: 8px;">No Invoice Selected For Review</h3>
+        <p style="color: var(--text-muted); max-width: 480px; margin: 0 auto 20px;">Select an invoice from the Document Ledger or upload a document to inspect side-by-side preview with real-time recalculation.</p>
+        <button class="btn btn-primary" onclick="switchToTab('view-ledger')">
+          <i data-lucide="list" style="width: 16px; height: 16px;"></i> Open Document Ledger
+        </button>
+      </div>
+
+      <!-- Active Review Split Screen -->
+      <div id="reviewer-split-container" class="split-screen-layout" style="display: none;">
+        
+        <!-- Left Pane: Document Viewport (PDF / Image) -->
+        <div class="preview-pane">
+          <div class="pane-toolbar">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span id="preview-filename" style="font-weight: 600; font-size: 0.88rem; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">document.pdf</span>
+              <span class="brand-badge" id="preview-filetype">PDF</span>
+            </div>
+            <div style="display: flex; gap: 6px;">
+              <button class="btn-icon" id="btn-zoom-in" title="Zoom In"><i data-lucide="zoom-in" style="width: 16px; height: 16px;"></i></button>
+              <button class="btn-icon" id="btn-zoom-out" title="Zoom Out"><i data-lucide="zoom-out" style="width: 16px; height: 16px;"></i></button>
+              <button class="btn-icon" id="btn-zoom-reset" title="Reset Zoom"><i data-lucide="rotate-ccw" style="width: 16px; height: 16px;"></i></button>
+              <a id="btn-open-raw-file" href="#" target="_blank" class="btn-icon" title="Open Full File in New Tab" style="display: flex; align-items: center; justify-content: center; text-decoration: none;"><i data-lucide="external-link" style="width: 16px; height: 16px;"></i></a>
+            </div>
+          </div>
+          <div class="preview-viewport" id="preview-viewport">
+            <img id="preview-image" src="" alt="Document Preview" style="display: none;">
+            <div id="preview-placeholder" style="color: var(--text-dim); text-align: center;">Rendering preview...</div>
+          </div>
+        </div>
+
+        <!-- Right Pane: Live Editable Form & Math Engine -->
+        <div class="review-pane">
+          <div class="pane-toolbar">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <h3 style="font-size: 0.95rem; font-weight: 700;">Extracted Data & Verification</h3>
+              <span id="review-status-pill" class="status-badge badge-pending">PENDING</span>
+            </div>
+            <div style="display: flex; gap: 6px;">
+              <button class="btn btn-secondary btn-sm" id="btn-reprocess-invoice" title="Re-run AI extraction engine">
+                <i data-lucide="refresh-cw" style="width: 14px; height: 14px;"></i> Re-extract
+              </button>
+            </div>
+          </div>
+
+          <div class="review-form-body">
+            
+            <!-- Discrepancy & Validation Issues Banner -->
+            <div id="review-issues-banner" class="issue-banner" style="display: none;">
+              <div class="issue-banner-title">
+                <i data-lucide="alert-octagon" style="width: 18px; height: 18px;"></i>
+                <span>Discrepancies & Validation Flags (<span id="issue-count">0</span>)</span>
+              </div>
+              <div id="issue-items-list"></div>
+            </div>
+
+            <!-- General Metadata Fields -->
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label>Vendor / Supplier Name</label>
+                <input type="text" id="edit-vendor" class="form-control" placeholder="Vendor Name">
+              </div>
+              <div class="form-group">
+                <label>Invoice Number #</label>
+                <input type="text" id="edit-invoice-num" class="form-control" placeholder="INV-XXXX">
+              </div>
+            </div>
+
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label>Invoice Date</label>
+                <input type="date" id="edit-date" class="form-control">
+              </div>
+              <div class="form-group">
+                <label>Due Date</label>
+                <input type="date" id="edit-due-date" class="form-control">
+              </div>
+              <div class="form-group">
+                <label>P.O. Number</label>
+                <input type="text" id="edit-po" class="form-control" placeholder="PO-XXXX">
+              </div>
+            </div>
+
+            <!-- Line Items Table Editor -->
+            <div style="margin: 20px 0 10px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <label style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">
+                  Line Items (<span id="line-items-count">0</span>)
+                </label>
+                <button type="button" class="btn btn-secondary btn-sm" id="btn-add-line-row">
+                  <i data-lucide="plus" style="width: 14px; height: 14px;"></i> Add Item
+                </button>
+              </div>
+
+              <div class="table-wrapper" style="max-height: 200px; overflow-y: auto;">
+                <table class="data-table" id="table-line-items">
+                  <thead>
+                    <tr>
+                      <th>Description</th>
+                      <th style="width: 70px;">Qty</th>
+                      <th style="width: 110px;">Unit Price ($)</th>
+                      <th style="width: 110px;">Total ($)</th>
+                      <th style="width: 40px;"></th>
+                    </tr>
+                  </thead>
+                  <tbody id="line-items-body">
+                    <!-- Dynamic Rows -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Summary Totals Calculation Grid -->
+            <div class="form-grid-2" style="background: rgba(15, 23, 42, 0.5); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-top: 14px;">
+              <div class="form-group">
+                <label>Subtotal ($)</label>
+                <input type="number" step="0.01" id="edit-subtotal" class="form-control">
+              </div>
+              <div class="form-group">
+                <label>Tax Amount ($)</label>
+                <input type="number" step="0.01" id="edit-tax" class="form-control">
+              </div>
+              <div class="form-group">
+                <label>Shipping / Freight ($)</label>
+                <input type="number" step="0.01" id="edit-shipping" class="form-control">
+              </div>
+              <div class="form-group">
+                <label>Discount ($)</label>
+                <input type="number" step="0.01" id="edit-discount" class="form-control">
+              </div>
+              <div class="form-group" style="grid-column: span 2;">
+                <label style="color: var(--accent-cyan); font-weight: 700;">Grand Total Amount ($)</label>
+                <input type="number" step="0.01" id="edit-total" class="form-control" style="font-size: 1.15rem; font-weight: 700; color: var(--accent-cyan);">
+              </div>
+            </div>
+
+            <!-- Auditor / Reviewer Notes -->
+            <div class="form-group" style="margin-top: 16px;">
+              <label>Auditor Review Notes</label>
+              <textarea id="edit-notes" class="form-control" rows="2" placeholder="Add human verification comments..."></textarea>
+            </div>
+
+          </div>
+
+          <!-- Bottom Review Action Bar -->
+          <div class="review-form-footer">
+            <button class="btn btn-rose btn-sm" id="btn-reject-invoice">
+              <i data-lucide="x-circle" style="width: 16px; height: 16px;"></i> Reject
+            </button>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-secondary btn-sm" id="btn-recalculate-math">
+                <i data-lucide="calculator" style="width: 16px; height: 16px;"></i> Recalculate
+              </button>
+              <button class="btn btn-emerald btn-sm" id="btn-approve-save">
+                <i data-lucide="check" style="width: 16px; height: 16px;"></i> Save & Approve
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW 4: AUTOMATION & FOLDER WATCHER HUB    -->
+    <!-- ========================================== -->
+    <section class="view-section" id="view-automation">
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title"><i data-lucide="radar" style="width: 20px; height: 20px; color: var(--accent-cyan);"></i> Automated Inbox & Folder Watcher</h2>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">Real-time file system observer and simulated email inbox listener that ingests & parses invoices hands-free.</p>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span id="watcher-status-indicator" class="status-badge badge-approved">
+              <i data-lucide="circle" style="width: 10px; height: 10px; fill: currentColor;"></i> ACTIVE
+            </span>
+            <button class="btn btn-secondary btn-sm" id="btn-toggle-watcher">Pause Watcher</button>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+          <div style="background: rgba(15, 23, 42, 0.6); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <h4 style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px;">Watched Folder Directory</h4>
+            <code id="watcher-dir-path" style="color: var(--accent-cyan); font-size: 0.85rem; word-break: break-all;">./inbox_folder</code>
+            <p style="font-size: 0.76rem; color: var(--text-dim); margin-top: 8px;">Drop any PDF or Image file directly into this directory on your machine to trigger automated instant processing!</p>
+          </div>
+
+          <div style="background: rgba(15, 23, 42, 0.6); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <h4 style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px;">Simulate Inbound Event</h4>
+            <p style="font-size: 0.76rem; color: var(--text-dim); margin-bottom: 12px;">Simulate receiving a new vendor invoice via Email Attachment or SFTP batch drop:</p>
+            <button class="btn btn-primary btn-sm" id="btn-simulate-email-drop">
+              <i data-lucide="mail" style="width: 15px; height: 15px;"></i> Simulate Inbound Email Attachment
+            </button>
+          </div>
+        </div>
+
+        <h4 style="font-size: 0.88rem; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+          <i data-lucide="terminal" style="width: 16px; height: 16px; color: var(--accent-cyan);"></i> Live Ingestion Activity Stream
+        </h4>
+        <div class="terminal-window" id="watcher-terminal">
+          [SYSTEM] Watchdog background observer listening on directory: ./inbox_folder<br/>
+          [READY] Waiting for new documents...
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- SETTINGS & CONFIGURATION MODAL             -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="modal-settings">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 class="card-title"><i data-lucide="sliders" style="width: 20px; height: 20px; color: var(--accent-cyan);"></i> Processing Engine & Rules Settings</h3>
+        <button class="btn-icon" id="btn-close-settings"><i data-lucide="x" style="width: 18px; height: 18px;"></i></button>
+      </div>
+
+      <form id="settings-form">
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label>Extraction Engine Mode</label>
+          <select id="setting-provider" class="select-filter" style="width: 100%;">
+            <option value="heuristic">Built-in Deterministic OCR & Table Parser (No API Key Required)</option>
+            <option value="gemini">Google Gemini 1.5 Flash Vision LLM</option>
+            <option value="openai">OpenAI GPT-4o Mini Vision</option>
+            <option value="ollama">Local Ollama Vision (LLaVA / Qwen-VL)</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label>Gemini API Key (Optional)</label>
+          <input type="password" id="setting-gemini-key" class="form-control" placeholder="AIzaSy...">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label>OpenAI API Key (Optional)</label>
+          <input type="password" id="setting-openai-key" class="form-control" placeholder="sk-proj-...">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label>High-Value Alert Threshold ($)</label>
+          <input type="number" id="setting-high-value" class="form-control" value="5000" min="100" step="500">
+          <span style="font-size: 0.75rem; color: var(--text-dim); margin-top: 2px;">Invoices with total ≥ this amount trigger high-value approval alerts.</span>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 20px;">
+          <label>Webhook Notification URL (Slack / Teams / Discord)</label>
+          <input type="url" id="setting-webhook-url" class="form-control" placeholder="https://hooks.slack.com/services/...">
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-cancel-settings">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">Save Configuration</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Application Logic -->
+  <script src="/js/app.js"></script>
+</body>
+</html>
