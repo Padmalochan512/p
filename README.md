@@ -43,6 +43,65 @@ A complete, professional, production-ready SaaS application that reads uploaded 
 
 ---
 
+## 🏗️ System Architecture
+
+```mermaid
+flowchart TB
+    subgraph Client ["🖥️ Modern Frontend (React 18 + Vite)"]
+        UI_Login["🔐 Auth & Demo Login"]
+        UI_Dash["📊 KPI & Recharts Dashboard"]
+        UI_Upload["📤 Multi-File Drag & Drop Upload"]
+        UI_Review["🔍 Split-Screen Doc Viewer & Field Editor"]
+        UI_Ledger["📋 Invoices Ledger & CSV Export"]
+    end
+
+    subgraph Gateway ["⚡ FastAPI Backend Server (Port 8080)"]
+        API_Auth["/api/auth (JWT Security)"]
+        API_Docs["/api/documents (Streaming & Storage)"]
+        API_Inv["/api/invoices (CRUD & Math Engine)"]
+        API_Dash["/api/dashboard & /api/reports"]
+    end
+
+    subgraph ProcessingEngine ["⚙️ AI & Document Processing Pipeline"]
+        Ingest["📥 Document Ingestion (MIME & Size Validator)"]
+        OCR["👁️ PyMuPDF (fitz) + Tesseract OCR Engine"]
+        
+        subgraph Extraction ["🧠 Multi-Tier Extraction"]
+            direction TB
+            ParserRule["📐 Deterministic Layout & Regex Parser (100% Offline)"]
+            ParserLLM["🤖 Vision LLM API (Gemini / OpenAI / Ollama)"]
+        end
+
+        subgraph Validation ["🧮 Financial Validation Engine"]
+            V1["Line Item Math (Qty × Price = Total)"]
+            V2["Subtotal Sum Check (Σ Lines = Subtotal)"]
+            V3["Grand Total Equation (Subtotal + Tax = Total)"]
+            V4["Date Anomaly & Duplicate Invoice Checks"]
+            V5["High-Value Alert Trigger (≥ ₹50,000)"]
+        end
+    end
+
+    subgraph Persistence ["💾 Relational Database & Storage"]
+        DB[(SQLite / PostgreSQL via SQLAlchemy)]
+        Storage[("📂 Secure Uploads Directory")]
+    end
+
+    %% Flows
+    Client <-->|REST API + JWT Bearer Tokens| Gateway
+    API_Docs --> Ingest
+    Ingest --> Storage
+    Ingest --> OCR
+    OCR --> ParserRule
+    OCR -.->|If API Key Configured| ParserLLM
+    ParserRule --> Validation
+    ParserLLM --> Validation
+    Validation --> DB
+    API_Inv <--> DB
+    API_Dash <--> DB
+```
+
+---
+
 ## 🛠️ Technology Stack
 
 - **Backend**: Python 3.10+, FastAPI, SQLAlchemy, SQLite, Pydantic v2, PyMuPDF (`fitz`), Pillow, PyTesseract, ReportLab, PyJWT, Passlib (Bcrypt).
